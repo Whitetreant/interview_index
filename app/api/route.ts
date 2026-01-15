@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { authenticate } from "./_utils/auth";
+import { limitRate } from "./_utils/rateLimit";
 
 type Todolist = {
     id: number;
@@ -9,13 +11,27 @@ type Todolist = {
 let nextID = 0;
 let todolist: Todolist[] = [];
 
-export async function GET()
+export async function GET(req: Request)
 {
+    const authError = authenticate(req);
+    if (authError) return authError;
+
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    const limitError = limitRate(ip);
+    if(limitError) return limitError;
+
     return NextResponse.json(todolist, {status: 200});   
 }
 
 export async function POST(req: Request)
 {
+    const authError = authenticate(req);
+    if (authError) return authError;
+
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    const limitError = limitRate(ip);
+    if(limitError) return limitError;
+
     try
     {
         const body = await req.json();
@@ -42,6 +58,13 @@ export async function POST(req: Request)
 
 export async function PUT(req: Request)
 {
+    const authError = authenticate(req);
+    if (authError) return authError;
+
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    const limitError = limitRate(ip);
+    if(limitError) return limitError;
+
     try
     {
         const body = await req.json();
@@ -73,6 +96,13 @@ export async function PUT(req: Request)
 
 export async function DELETE(req: Request)
 {
+    const authError = authenticate(req);
+    if (authError) return authError;
+
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    const limitError = limitRate(ip);
+    if(limitError) return limitError;
+
     try
     {
         const {id} = await req.json();
